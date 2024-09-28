@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +20,18 @@ export class AuthService {
     return this.http.post(`${environment.apiBaseUrl}/signin`, {
       email,
       password,
+    });
+  }
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post(`${environment.apiBaseUrl}/forgot-password`, {
+      email,
+    });
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<any> {
+    return this.http.post(`${environment.apiBaseUrl}/reset-password`, {
+      token,
+      newPassword,
     });
   }
 

@@ -7,9 +7,4 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(private jwtService: JwtService) {
     super();
   }
-
-  // canActivate(context: ExecutionContext): boolean {
-  //   // Custom logic if needed
-  //   return super.canActivate(context);
-  // }
 }

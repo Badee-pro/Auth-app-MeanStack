@@ -26,10 +26,8 @@ export class SignInComponent {
       return;
     }
 
-    const email = this.email.toLowerCase();
-
     const userCredentials = {
-      email: this.email,
+      email: this.email.toLowerCase(), // Convert email to lowercase
       password: this.password,
     };
 
@@ -41,12 +39,17 @@ export class SignInComponent {
           this.router.navigate(['/profile']); // Navigate to the user-profile
         },
         (error) => {
-          if (error.status === 404) {
-            this.errorMessage = 'Email is not registered.';
+          // Check for the specific error message from the backend
+          if (
+            error.status === 400 &&
+            error.error.message.includes('not registered')
+          ) {
+            this.errorMessage = 'This email is not registered. Please sign up.';
           } else if (error.status === 401) {
-            this.errorMessage = 'Wrong password entered.';
+            this.errorMessage = 'Invalid password. Please try again.'; // Error for incorrect password
           } else {
-            this.errorMessage = 'Authentication failed. Please try again.';
+            this.errorMessage =
+              'Authentication failed. Please try again later.'; // Fallback message
           }
           console.error('Sign-in failed', error);
         }

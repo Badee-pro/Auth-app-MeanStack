@@ -9,6 +9,7 @@ import {
   UseGuards,
   HttpException,
   HttpStatus,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInDto } from './dto/sign-in.dto';
@@ -24,11 +25,7 @@ export class AuthController {
     try {
       return await this.authService.signUp(signUpDto);
     } catch (error) {
-      if (error.message === 'Password must be at least 6 characters long.') {
-        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-      } else {
-        throw new HttpException('Sign-up failed.', HttpStatus.BAD_REQUEST);
-      }
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -37,22 +34,13 @@ export class AuthController {
     try {
       return await this.authService.signIn(signInDto);
     } catch (error) {
-      if (error.message === 'User not found') {
-        throw new HttpException(
-          'Email is not registered.',
-          HttpStatus.NOT_FOUND
-        );
-      } else if (error.message === 'Invalid password') {
-        throw new HttpException(
-          'Wrong password entered.',
-          HttpStatus.UNAUTHORIZED
-        );
-      } else {
-        throw new HttpException(
-          'Authentication failed.',
-          HttpStatus.UNAUTHORIZED
-        );
+      if (error instanceof UnauthorizedException) {
+        throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
       }
+      throw new HttpException(
+        'Authentication failed. Please check your credentials.',
+        HttpStatus.UNAUTHORIZED
+      );
     }
   }
 
