@@ -16,7 +16,7 @@ export class SignInComponent {
   email = '';
   password = '';
   errorMessage = '';
-  emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email regex
+  emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -37,8 +37,8 @@ export class SignInComponent {
       .post(`${environment.apiBaseUrl}/signin`, userCredentials)
       .subscribe(
         (response: any) => {
-          localStorage.setItem('token', response.accessToken); // Save the token in local storage
-          this.router.navigate(['/profile']); // Navigate to the user-profile
+          localStorage.setItem('token', response.accessToken);
+          this.router.navigate(['/profile']);
         },
         (error) => {
           if (error.status === 404) {

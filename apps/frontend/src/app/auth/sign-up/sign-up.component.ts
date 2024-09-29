@@ -16,15 +16,13 @@ export class SignUpComponent {
   fullName = '';
   email = '';
   password = '';
-  errorMessage = ''; // Added for error display
+  errorMessage = '';
   successMessage = '';
-  emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email regex
+  emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   constructor(private http: HttpClient, private router: Router) {}
 
   onSubmit() {
-    // Basic validation
-
     if (!this.fullName || !this.email || !this.password) {
       this.errorMessage = 'Please fill in all fields.';
       return;
@@ -44,8 +42,8 @@ export class SignUpComponent {
       .subscribe(
         (response) => {
           this.successMessage = 'Saved successfully';
-          this.errorMessage = ''; // Clear error message if any
-          setTimeout(() => this.router.navigate(['/signin']), 2000); // Redirect after 2 seconds
+          this.errorMessage = '';
+          setTimeout(() => this.router.navigate(['/signin']), 1000);
         },
         (error) => {
           if (error.status === 400) {
@@ -54,7 +52,7 @@ export class SignUpComponent {
             this.errorMessage =
               'Sign up failed. Please check your details and try again.';
           }
-          this.successMessage = ''; // Clear success message if any
+          this.successMessage = '';
           console.error('Sign up failed', error);
         }
       );
