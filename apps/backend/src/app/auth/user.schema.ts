@@ -2,11 +2,13 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 
-// Extend the UserDocument interface to include the comparePassword method
 export interface UserDocument extends Document {
   fullName: string;
   email: string;
   password: string;
+  loginAttempts: number;
+  isLocked: boolean;
+
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -20,11 +22,16 @@ export class User {
 
   @Prop({ required: true })
   password: string;
+
+  @Prop({ default: 0 })
+  loginAttempts: number;
+
+  @Prop({ default: false })
+  isLocked: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-// Pre-save hook to hash the password
 UserSchema.pre<UserDocument>('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
@@ -39,7 +46,6 @@ UserSchema.pre<UserDocument>('save', async function (next) {
   }
 });
 
-// Adding the comparePassword method explicitly as a schema method
 UserSchema.methods.comparePassword = async function (
   candidatePassword: string
 ): Promise<boolean> {

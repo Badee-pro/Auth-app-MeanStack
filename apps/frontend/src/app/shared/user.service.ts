@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+// import { environment } from '../../../environments/environment';
 import { User } from './user.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -19,7 +20,6 @@ export class UserService {
       this.noAuthHeader
     );
   }
-
   login(authCredentials: { email: string; password: string }): Observable<any> {
     return this.http.post(
       `${environment.apiBaseUrl}/signin`,

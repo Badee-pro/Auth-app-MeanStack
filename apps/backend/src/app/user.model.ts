@@ -7,7 +7,7 @@ export class User extends Document {
   @Prop({ required: true })
   fullName: string;
 
-  @Prop({ required: true, unique: true, lowercase: true }) // Ensure email is lowercase
+  @Prop({ required: true, unique: true, lowercase: true })
   email: string;
 
   @Prop({ required: true })
@@ -23,14 +23,12 @@ export const UserSchema = SchemaFactory.createForClass(User);
 UserSchema.pre('save', async function (next) {
   const user = this as User;
 
-  // Convert email to lowercase
   if (user.email) {
     user.email = user.email.toLowerCase();
   }
 
   if (!user.isModified('password')) return next();
 
-  // Hash password if modified
   const salt = await bcrypt.genSalt(10);
   user.password = await bcrypt.hash(user.password, salt);
   next();

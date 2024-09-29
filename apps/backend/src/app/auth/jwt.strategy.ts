@@ -7,35 +7,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User } from '../user.model';
 import { Model } from 'mongoose';
 
-// @Injectable()
-// export class JwtStrategy extends PassportStrategy(Strategy) {
-//   constructor(configService: ConfigService) {
-//     // const secret = configService.get('SECRET#123');
-//     super({
-//       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-//       ignoreExpiration: false,
-//       // secretOrKey: configService.get<string>('SECRET#123'),
-//       secretOrKey: 'Hghww9My',
-//       signOptions: { expiresIn: '8h' },
-//     });
-//   }
-
-//   async validate(payload: JwtPayload) {
-//     return {
-//       userId: payload.sub,
-//       fullName: payload.fullName,
-//       email: payload.email,
-//     };
-//   }
-// }
-
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'Hghww9My',
+      secretOrKey: process.env.JWT_SECRET,
     });
   }
 

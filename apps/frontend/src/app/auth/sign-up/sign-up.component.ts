@@ -47,7 +47,7 @@ export class SignUpComponent {
       (error) => {
         if (error.status === 400) {
           this.errorMessage =
-            error.error.message || 'An error occurred. Please try again.';
+            error.error.errorMessage || 'An error occurred. Please try again.';
         } else {
           this.errorMessage =
             'Sign up failed. Please check your details and try again.';

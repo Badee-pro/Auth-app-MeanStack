@@ -16,7 +16,7 @@ export class SignInComponent {
   email = '';
   password = '';
   errorMessage = '';
-  emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email regex
+  emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -27,7 +27,7 @@ export class SignInComponent {
     }
 
     const userCredentials = {
-      email: this.email.toLowerCase(), // Convert email to lowercase
+      email: this.email.toLowerCase(),
       password: this.password,
     };
 
@@ -35,21 +35,26 @@ export class SignInComponent {
       .post(`${environment.apiBaseUrl}/signin`, userCredentials)
       .subscribe(
         (response: any) => {
-          localStorage.setItem('token', response.accessToken); // Save the token in local storage
-          this.router.navigate(['/profile']); // Navigate to the user-profile
+          localStorage.setItem('token', response.accessToken);
+          this.router.navigate(['/profile']);
         },
         (error) => {
-          // Check for the specific error message from the backend
-          if (
-            error.status === 400 &&
-            error.error.message.includes('not registered')
-          ) {
-            this.errorMessage = 'This email is not registered. Please sign up.';
+          if (error.status === 400) {
+            if (error.error.message.includes('not registered')) {
+              this.errorMessage =
+                'This email is not registered. Please sign up.';
+            } else {
+              this.errorMessage = 'Invalid credentials. Please try again.';
+            }
           } else if (error.status === 401) {
-            this.errorMessage = 'Invalid password. Please try again.'; // Error for incorrect password
+            if (error.error.message === 'You have to contact support.') {
+              this.errorMessage = 'You have to contact support.';
+            } else {
+              this.errorMessage = 'Invalid password. Please try again.';
+            }
           } else {
             this.errorMessage =
-              'Authentication failed. Please try again later.'; // Fallback message
+              'Authentication failed. Please try again later.';
           }
           console.error('Sign-in failed', error);
         }

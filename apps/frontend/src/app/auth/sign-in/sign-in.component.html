@@ -19,7 +19,7 @@
           class="validation-message"
           *ngIf="emailInput.invalid && emailInput.touched"
         >
-          <small *ngIf="emailInput.errors?.['required']"
+          <small class="validation-message" *ngIf="emailInput.errors?.['required']"
             >Email is required</small
           >
           <small class="validation-message" *ngIf="emailInput.errors?.['email']"
@@ -40,7 +40,9 @@
           #passwordInput="ngModel"
         />
         <div *ngIf="passwordInput.invalid && passwordInput.touched">
-          <small *ngIf="passwordInput.errors?.['required']"
+          <small
+            class="validation-message"
+            *ngIf="passwordInput.errors?.['required']"
             >Password is required</small
           >
         </div>

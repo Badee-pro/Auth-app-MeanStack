@@ -47,7 +47,7 @@ export class UserProfileComponent implements OnInit {
           this.errorMessage = 'Error loading profile';
           console.error('Error loading profile', error);
           if (error.status === 401) {
-            this.router.navigate(['/signin']); // Redirect to sign-in if unauthorized
+            this.router.navigate(['/signin']);
           }
         }
       );

@@ -180,7 +180,7 @@ input[type='password'].invalid-textbox {
   border-bottom: 2px solid #ed5558;
 }
 
-label.validation-message {
+small.validation-message {
   color: #ed5558;
 }
 

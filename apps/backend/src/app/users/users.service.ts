@@ -13,31 +13,26 @@ import { SignUpDto } from '../auth/dto/sign-up.dto';
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-  // Find user by email
   async findByEmail(email: string): Promise<UserDocument | null> {
     return this.userModel.findOne({ email }).exec();
   }
 
-  // Update this method to return a UserDocument
   async findById(userId: string): Promise<UserDocument> {
     const user = await this.userModel.findById(userId).exec();
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return user; // Return UserDocument
+    return user;
   }
 
-  // Update this method to return a UserDocument
   async createUser(signUpDto: SignUpDto): Promise<UserDocument> {
     const { fullName, email, password } = signUpDto;
 
-    // Check if the user already exists
     const existingUser = await this.findByEmail(email);
     if (existingUser) {
       throw new BadRequestException('User already exists');
     }
 
-    // Hash the password before saving the user
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new this.userModel({
@@ -46,10 +41,21 @@ export class UsersService {
       password: hashedPassword,
     });
 
-    return newUser.save(); // Return UserDocument
+    return newUser.save();
   }
 
-  // Method to compare passwords
+  async incrementLoginAttempts(email: string): Promise<void> {
+    await this.userModel
+      .updateOne({ email }, { $inc: { loginAttempts: 1 } })
+      .exec();
+  }
+
+  async resetLoginAttempts(email: string): Promise<void> {
+    await this.userModel
+      .updateOne({ email }, { $set: { loginAttempts: 0 } })
+      .exec();
+  }
+
   async comparePasswords(
     storedPassword: string,
     providedPassword: string

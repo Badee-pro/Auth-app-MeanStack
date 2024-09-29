@@ -1,40 +1,25 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { signIn, signUp, loadUserProfile } from './auth.actions';
-import { map, mergeMap } from 'rxjs/operators';
+// import { AuthService } from '../services/auth.service';
+import { signIn, signInSuccess, signInFailure } from './auth.actions';
+import { catchError, map, mergeMap } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { AuthService } from './auth.service';
 
 @Injectable()
 export class AuthEffects {
-  constructor(private actions$: Actions, private authService: AuthService) {}
-
-  signUp$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(signUp),
-      mergeMap((action) =>
-        this.authService
-          .signUp(action.fullName, action.email, action.password)
-          .pipe(
-            map((response: any) =>
-              loadUserProfile({
-                user: { fullName: response.fullName, email: response.email },
-              })
-            )
-          )
-      )
-    )
-  );
+  constructor(
+    private actions$: Actions,
+    private authService: AuthService
+  ) {}
 
   signIn$ = createEffect(() =>
     this.actions$.pipe(
       ofType(signIn),
-      mergeMap((action) =>
-        this.authService.signIn(action.email, action.password).pipe(
-          map((response: any) =>
-            loadUserProfile({
-              user: { fullName: response.fullName, email: response.email },
-            })
-          )
+      mergeMap(({ email, password }) =>
+        this.authService.login({ email, password }).pipe(
+          map((user) => signInSuccess({ user })),
+          catchError((error) => of(signInFailure({ error })))
         )
       )
     )
