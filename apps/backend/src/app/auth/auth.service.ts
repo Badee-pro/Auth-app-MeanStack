@@ -1,42 +1,36 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SignUpDto } from './dto/sign-up.dto';
 import { SignInDto } from './dto/sign-in.dto';
-import { User, UserDocument } from './user.schema';
+import { User, UserDocument } from './user.schema'; // Ensure correct import
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { UsersService } from '../users/users.service';
-import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
-    private jwtService: JwtService,
-    private readonly usersService: UsersService
+    @InjectModel(User.name) private userModel: Model<UserDocument>, // Ensure correct Model
+    private jwtService: JwtService
   ) {}
 
   async signUp(signUpDto: SignUpDto) {
     const { fullName, email, password } = signUpDto;
 
+    // Validate password length
     if (password.length < 6) {
       throw new BadRequestException(
         'Password must be at least 6 characters long.'
       );
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.toLowerCase())) {
-      throw new BadRequestException('Invalid email format.');
-    }
-
+    // Convert email to lowercase
     const lowerCaseEmail = email.toLowerCase();
 
+    // Check if user already exists
     const existingUser = await this.userModel.findOne({
       email: lowerCaseEmail,
     });
@@ -44,44 +38,38 @@ export class AuthService {
       throw new BadRequestException('User with this email already exists.');
     }
 
+    // Create and save new user
     const user = new this.userModel({
       fullName,
       email: lowerCaseEmail,
-      password: await bcrypt.hash(password, 10),
+      password,
     });
-
     await user.save();
+
+    // Return JWT token
     return this.createJwtToken(user);
   }
 
   async signIn(signInDto: SignInDto) {
     const { email, password } = signInDto;
+
+    // Convert email to lowercase
     const lowerCaseEmail = email.toLowerCase();
 
+    // Find user by email
     const user = await this.userModel.findOne({ email: lowerCaseEmail });
+
     if (!user) {
-      throw new UnauthorizedException('Email is not registered.');
+      throw new UnauthorizedException('Invalid credentials.');
     }
 
-    if (user.loginAttempts >= 3) {
-      throw new ForbiddenException('Account locked. Please contact support.');
+    // Compare password
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      throw new UnauthorizedException('Invalid credentials.');
     }
 
-    console.log('Entered Password:', password);
-    console.log('Stored Hashed Password:', user.password);
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      user.loginAttempts += 1;
-      await user.save();
-      throw new UnauthorizedException('Incorrect password.');
-    }
-
-    if (user.loginAttempts > 0) {
-      user.loginAttempts = 0;
-      await user.save();
-    }
-
+    // Return JWT token
     return this.createJwtToken(user);
   }
 
@@ -97,18 +85,11 @@ export class AuthService {
   }
 
   async findByEmail(email: string) {
+    // Convert email to lowercase
     return this.userModel.findOne({ email: email.toLowerCase() });
   }
 
   async findById(userId: string) {
     return this.userModel.findById(userId);
-  }
-
-  async incrementLoginAttempts(email: string): Promise<void> {
-    await this.usersService.incrementLoginAttempts(email);
-  }
-
-  async resetLoginAttempts(email: string): Promise<void> {
-    await this.usersService.resetLoginAttempts(email);
   }
 }

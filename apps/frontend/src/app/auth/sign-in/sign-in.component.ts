@@ -16,7 +16,7 @@ export class SignInComponent {
   email = '';
   password = '';
   errorMessage = '';
-  emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email regex
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -26,8 +26,10 @@ export class SignInComponent {
       return;
     }
 
+    const email = this.email.toLowerCase();
+
     const userCredentials = {
-      email: this.email.toLowerCase(),
+      email: this.email,
       password: this.password,
     };
 
@@ -35,26 +37,16 @@ export class SignInComponent {
       .post(`${environment.apiBaseUrl}/signin`, userCredentials)
       .subscribe(
         (response: any) => {
-          localStorage.setItem('token', response.accessToken);
-          this.router.navigate(['/profile']);
+          localStorage.setItem('token', response.accessToken); // Save the token in local storage
+          this.router.navigate(['/profile']); // Navigate to the user-profile
         },
         (error) => {
-          if (error.status === 400) {
-            if (error.error.message.includes('not registered')) {
-              this.errorMessage =
-                'This email is not registered. Please sign up.';
-            } else {
-              this.errorMessage = 'Invalid credentials. Please try again.';
-            }
+          if (error.status === 404) {
+            this.errorMessage = 'Email is not registered.';
           } else if (error.status === 401) {
-            if (error.error.message === 'You have to contact support.') {
-              this.errorMessage = 'You have to contact support.';
-            } else {
-              this.errorMessage = 'Invalid password. Please try again.';
-            }
+            this.errorMessage = 'Wrong password entered.';
           } else {
-            this.errorMessage =
-              'Authentication failed. Please try again later.';
+            this.errorMessage = 'Authentication failed. Please try again.';
           }
           console.error('Sign-in failed', error);
         }
