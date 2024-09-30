@@ -10,9 +10,9 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
-import { AuthEffects } from './auth/state/auth.effects';
-import { authReducer } from './auth/state/auth.reducer';
-import { AuthService } from './auth/state/auth.service';
+import { AuthEffects } from './store/auth.effects';
+import { authReducer } from './store/auth.reducer';
+import { AuthService } from './store/auth.service';
 
 @NgModule({
   declarations: [
