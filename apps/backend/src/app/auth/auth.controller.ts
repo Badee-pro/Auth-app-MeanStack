@@ -22,38 +22,44 @@ export class AuthController {
   @Post('signup')
   async signUp(@Body() signUpDto: SignUpDto) {
     try {
-      return await this.authService.signUp(signUpDto);
+      const user = await this.authService.signUp(signUpDto);
+      return {
+        message: 'User registered successfully',
+        user: { email: user.user.email, fullName: user.user.fullName },
+      };
     } catch (error) {
-      if (error.message === 'Password must be at least 6 characters long.') {
-        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-      } else {
-        throw new HttpException('Sign-up failed.', HttpStatus.BAD_REQUEST);
-      }
+      this.handleSignUpErrors(error);
     }
   }
 
   @Post('signin')
   async signIn(@Body() signInDto: SignInDto) {
     try {
-      return await this.authService.signIn(signInDto);
+      const { accessToken, user } = await this.authService.signIn(signInDto);
+      return { accessToken, user };
     } catch (error) {
-      if (error.message === 'User not found') {
-        throw new HttpException(
-          'Email is not registered.',
-          HttpStatus.NOT_FOUND
-        );
-      } else if (error.message === 'Invalid password') {
-        throw new HttpException(
-          'Wrong password entered.',
-          HttpStatus.UNAUTHORIZED
-        );
-      } else {
-        throw new HttpException(
-          'Authentication failed.',
-          HttpStatus.UNAUTHORIZED
-        );
-      }
+      this.handleSignInErrors(error);
     }
+  }
+
+  private handleSignUpErrors(error: Error) {
+    if (error instanceof HttpException) {
+      throw error;
+    }
+    throw new HttpException(
+      'Sign-up failed. Please try again.',
+      HttpStatus.INTERNAL_SERVER_ERROR
+    );
+  }
+
+  private handleSignInErrors(error: Error) {
+    if (error instanceof HttpException) {
+      throw error;
+    }
+    throw new HttpException(
+      'Authentication failed. Please try again.',
+      HttpStatus.UNAUTHORIZED
+    );
   }
 
   @UseGuards(JwtAuthGuard)

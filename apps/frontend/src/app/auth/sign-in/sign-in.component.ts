@@ -26,10 +26,8 @@ export class SignInComponent {
       return;
     }
 
-    const email = this.email.toLowerCase();
-
     const userCredentials = {
-      email: this.email,
+      email: this.email.toLowerCase(),
       password: this.password,
     };
 
@@ -41,10 +39,8 @@ export class SignInComponent {
           this.router.navigate(['/profile']);
         },
         (error) => {
-          if (error.status === 404) {
-            this.errorMessage = 'Email is not registered.';
-          } else if (error.status === 401) {
-            this.errorMessage = 'Wrong password entered.';
+          if (error.error?.message) {
+            this.errorMessage = error.error.message;
           } else {
             this.errorMessage = 'Authentication failed. Please try again.';
           }

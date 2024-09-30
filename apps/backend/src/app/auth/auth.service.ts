@@ -10,6 +10,14 @@ import { User, UserDocument } from './user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
+interface AuthResponse {
+  accessToken: string;
+  user: {
+    fullName: string;
+    email: string;
+  };
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -45,26 +53,35 @@ export class AuthService {
     return this.createJwtToken(user);
   }
 
-  async signIn(signInDto: SignInDto) {
+  async signIn(signInDto: SignInDto): Promise<AuthResponse> {
     const { email, password } = signInDto;
-
     const lowerCaseEmail = email.toLowerCase();
-
     const user = await this.userModel.findOne({ email: lowerCaseEmail });
 
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials.');
+      throw new UnauthorizedException('Email is not registered.');
+    }
+
+    if (user.loginAttempts >= 3) {
+      throw new UnauthorizedException(
+        'Your account has been locked due to multiple failed login attempts.'
+      );
     }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      throw new UnauthorizedException('Invalid credentials.');
+      user.loginAttempts += 1;
+      await user.save();
+      throw new UnauthorizedException('Wrong password.');
     }
+
+    user.loginAttempts = 0;
+    await user.save();
 
     return this.createJwtToken(user);
   }
 
-  createJwtToken(user: UserDocument) {
+  createJwtToken(user: UserDocument): AuthResponse {
     const payload = { email: user.email, sub: user._id };
     return {
       accessToken: this.jwtService.sign(payload),
