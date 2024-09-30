@@ -25,9 +25,6 @@ export class User {
 
   @Prop({ default: 0 })
   loginAttempts: number;
-
-  @Prop({ default: false })
-  isLocked: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
