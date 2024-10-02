@@ -7,7 +7,6 @@ export interface UserDocument extends Document {
   email: string;
   password: string;
   loginAttempts: number;
-  isLocked: boolean;
 
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
